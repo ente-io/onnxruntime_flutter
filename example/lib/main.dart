@@ -7,6 +7,8 @@ import 'package:onnxruntime_example/record_manager.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:onnxruntime_example/model_type_test.dart';
 import 'package:onnxruntime_example/vad_iterator.dart';
+import 'package:onnxruntime_example/clip_image_encoder.dart';
+import 'package:onnxruntime_example/clip_text_encoder.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,6 +27,8 @@ class _MyAppState extends State<MyApp> {
   String? _wavPath;
   AudioPlayer? _audioPlayer;
   VadIterator? _vadIterator;
+  ClipImageEncoder? _clipImageEncoder;
+  ClipTextEncoder? _clipTextEncoder;
   static const frameSize = 64;
 
   @override
@@ -34,6 +38,11 @@ class _MyAppState extends State<MyApp> {
 
     _vadIterator = VadIterator(frameSize, RecordManager.sampleRate);
     _vadIterator?.initModel();
+
+    _clipImageEncoder = ClipImageEncoder();
+    _clipImageEncoder?.initModel();
+    _clipTextEncoder = ClipTextEncoder();
+    _clipTextEncoder?.initModel();
   }
 
   @override
@@ -122,10 +131,10 @@ class _MyAppState extends State<MyApp> {
     var end = start + windowByteCount;
     List<int> frameBuffer;
     final startTime = DateTime.now().millisecondsSinceEpoch;
-    while(end <= bytes.length) {
+    while (end <= bytes.length) {
       frameBuffer = bytes.sublist(start, end).toList();
       final floatBuffer =
-      _transformBuffer(frameBuffer).map((e) => e / 32768).toList();
+          _transformBuffer(frameBuffer).map((e) => e / 32768).toList();
       await _vadIterator?.predict(Float32List.fromList(floatBuffer));
       start += windowByteCount;
       end = start + windowByteCount;
