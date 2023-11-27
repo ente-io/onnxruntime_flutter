@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:onnxruntime/onnxruntime.dart';
+import 'package:image/image.dart' as img;
 
 class ClipImageEncoder {
   OrtSessionOptions? _sessionOptions;
@@ -50,5 +51,36 @@ class ClipImageEncoder {
     inputOrt.release();
     runOptions.release();
     _session?.release();
+  }
+
+  inferByImage(String imagePath) {
+    final runOptions = OrtRunOptions();
+
+    // Change this with path
+    final rgb8 = img.Image(width: 784, height: 890, format: img.Format.float32);
+    final inputImage = img.copyResize(rgb8,
+        width: 224, height: 224, interpolation: img.Interpolation.linear);
+    final mean = [0.48145466, 0.4578275, 0.40821073];
+    final std = [0.26862954, 0.26130258, 0.27577711];
+    final processedImage = imageToByteListFloat32(inputImage, 224, mean, std);
+  }
+
+  Float32List imageToByteListFloat32(
+      img.Image image, int inputSize, List<double> mean, List<double> std) {
+    var convertedBytes = Float32List(1 * inputSize * inputSize * 3);
+    var buffer = Float32List.view(convertedBytes.buffer);
+    int pixelIndex = 0;
+    assert(mean.length == 3);
+    assert(std.length == 3);
+
+    for (var i = 0; i < inputSize; i++) {
+      for (var j = 0; j < inputSize; j++) {
+        var pixel = image.getPixel(j, i);
+        buffer[pixelIndex++] = (pixel.r - mean[0]) / std[0];
+        buffer[pixelIndex++] = (pixel.g - mean[1]) / std[1];
+        buffer[pixelIndex++] = (pixel.b - mean[2]) / std[2];
+      }
+    }
+    return convertedBytes.buffer.asFloat32List();
   }
 }

@@ -126,7 +126,7 @@ class _MyAppState extends State<MyApp> {
     // final endTime = DateTime.now().millisecondsSinceEpoch;
     // print('infer cost time=${endTime - startTime}ms');
     _clipTextEncoder?.infer();
-    _clipImageEncoder?.infer();
+    _clipImageEncoder?.inferByImage("test.png");
     const windowByteCount = frameSize * 2 * RecordManager.sampleRate ~/ 1000;
     final bytes = await File(_pcmPath!).readAsBytes();
     var start = 0;
