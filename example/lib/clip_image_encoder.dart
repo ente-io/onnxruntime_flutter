@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
@@ -57,12 +58,19 @@ class ClipImageEncoder {
     final runOptions = OrtRunOptions();
 
     // Change this with path
-    final rgb8 = img.Image(width: 784, height: 890, format: img.Format.float32);
-    final inputImage = img.copyResize(rgb8,
+    //final rgb8 = img.Image(width: 784, height: 890, format: img.Format.float32);
+    final rgb = img.decodeJpg(File(imagePath).readAsBytesSync()) as img.Image;
+    final inputImage = img.copyResize(rgb,
         width: 224, height: 224, interpolation: img.Interpolation.linear);
     final mean = [0.48145466, 0.4578275, 0.40821073];
     final std = [0.26862954, 0.26130258, 0.27577711];
     final processedImage = imageToByteListFloat32(inputImage, 224, mean, std);
+
+    final inputOrt = OrtValueTensor.createTensorWithDataList(
+        processedImage, [1, 3, 224, 224]);
+    final inputs = {'input': inputOrt};
+    final outputs = _session?.run(runOptions, inputs);
+    print((outputs?[0]?.value as List<List<double>>)[0]);
   }
 
   Float32List imageToByteListFloat32(
