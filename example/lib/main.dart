@@ -125,6 +125,8 @@ class _MyAppState extends State<MyApp> {
     // print('out=${(await ModelTypeTest.testString())[0].value}');
     // final endTime = DateTime.now().millisecondsSinceEpoch;
     // print('infer cost time=${endTime - startTime}ms');
+    _clipTextEncoder?.infer();
+    _clipImageEncoder?.infer();
     const windowByteCount = frameSize * 2 * RecordManager.sampleRate ~/ 1000;
     final bytes = await File(_pcmPath!).readAsBytes();
     var start = 0;
