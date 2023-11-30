@@ -60,8 +60,14 @@ class ClipImageEncoder {
     // Change this with path
     //final rgb8 = img.Image(width: 784, height: 890, format: img.Format.float32);
     final rgb = img.decodeJpg(File(imagePath).readAsBytesSync()) as img.Image;
-    final inputImage = img.copyResize(rgb,
-        width: 224, height: 224, interpolation: img.Interpolation.linear);
+    img.Image inputImage;
+    if (rgb.height >= rgb.width) {
+      inputImage = img.copyResize(rgb,
+          width: 224, interpolation: img.Interpolation.linear);
+    } else {
+      inputImage = img.copyResize(rgb,
+          height: 224, interpolation: img.Interpolation.linear);
+    }
     final mean = [0.48145466, 0.4578275, 0.40821073];
     final std = [0.26862954, 0.26130258, 0.27577711];
     final processedImage = imageToByteListFloat32(inputImage, 224, mean, std);
@@ -83,7 +89,7 @@ class ClipImageEncoder {
 
     for (var i = 0; i < inputSize; i++) {
       for (var j = 0; j < inputSize; j++) {
-        var pixel = image.getPixel(j, i);
+        var pixel = image.getPixel(i, j);
         buffer[pixelIndex++] = (pixel.r - mean[0]) / std[0];
         buffer[pixelIndex++] = (pixel.g - mean[1]) / std[1];
         buffer[pixelIndex++] = (pixel.b - mean[2]) / std[2];
