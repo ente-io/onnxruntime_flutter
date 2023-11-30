@@ -42,8 +42,8 @@ class _MyAppState extends State<MyApp> {
 
     _clipImageEncoder = ClipImageEncoder();
     _clipImageEncoder?.initModel();
-    _clipTextEncoder = ClipTextEncoder();
-    _clipTextEncoder?.initModel();
+    // _clipTextEncoder = ClipTextEncoder();
+    // _clipTextEncoder?.initModel();
   }
 
   @override
@@ -127,26 +127,9 @@ class _MyAppState extends State<MyApp> {
     // final endTime = DateTime.now().millisecondsSinceEpoch;
     // print('infer cost time=${endTime - startTime}ms');
     //_clipTextEncoder?.infer();
-    const imgPath = "assets/images/cycle.jpg";
-    final path = await getAccessiblePathForAsset(imgPath, "test.jpg");
+    const imgPath = "assets/images/astro.png";
+    final path = await getAccessiblePathForAsset(imgPath, "test.png");
     _clipImageEncoder?.inferByImage(path);
-    const windowByteCount = frameSize * 2 * RecordManager.sampleRate ~/ 1000;
-    final bytes = await File(_pcmPath!).readAsBytes();
-    var start = 0;
-    var end = start + windowByteCount;
-    List<int> frameBuffer;
-    final startTime = DateTime.now().millisecondsSinceEpoch;
-    while (end <= bytes.length) {
-      frameBuffer = bytes.sublist(start, end).toList();
-      final floatBuffer =
-          _transformBuffer(frameBuffer).map((e) => e / 32768).toList();
-      await _vadIterator?.predict(Float32List.fromList(floatBuffer));
-      start += windowByteCount;
-      end = start + windowByteCount;
-    }
-    _vadIterator?.reset();
-    final endTime = DateTime.now().millisecondsSinceEpoch;
-    print('vad cost time=${endTime - startTime}ms');
   }
 
   Int16List _transformBuffer(List<int> buffer) {
