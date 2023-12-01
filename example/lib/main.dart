@@ -6,6 +6,7 @@ import 'package:onnxruntime/onnxruntime.dart';
 import 'package:onnxruntime_example/record_manager.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:onnxruntime_example/model_type_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:onnxruntime_example/utils.dart';
 import 'package:onnxruntime_example/vad_iterator.dart';
 import 'package:onnxruntime_example/clip_image_encoder.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final imgPath = "assets/images/input.jpg";
   late String _version;
   String? _pcmPath;
   String? _wavPath;
@@ -42,8 +44,8 @@ class _MyAppState extends State<MyApp> {
 
     _clipImageEncoder = ClipImageEncoder();
     _clipImageEncoder?.initModel();
-    _clipTextEncoder = ClipTextEncoder();
-    _clipTextEncoder?.initModel();
+    // _clipTextEncoder = ClipTextEncoder();
+    // _clipTextEncoder?.initModel();
   }
 
   @override
@@ -69,6 +71,35 @@ class _MyAppState extends State<MyApp> {
                 ),
                 const SizedBox(
                   height: 50,
+                ),
+                FutureBuilder<String>(
+                  future: getAccessiblePathForAsset(imgPath, "test.jpg"),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String> snapshot) {
+                    if (snapshot.hasData) {
+                      final file = File(snapshot.data!).readAsBytesSync();
+                      final rgb = img.decodeJpg(file)!;
+                      var inputImage = img.copyResize(rgb,
+                          height: 224, interpolation: img.Interpolation.linear);
+                      inputImage = img.copyCrop(
+                        inputImage,
+                        x: (inputImage.width - 224) ~/ 2,
+                        y: 0,
+                        width: 224,
+                        height: 224,
+                      );
+                      return Column(
+                        children: [
+                          Image.memory(Uint8List.fromList(file)),
+                          const Padding(padding: EdgeInsets.all(24)),
+                          Image.memory(
+                              Uint8List.fromList(img.encodeJpg(inputImage))),
+                        ],
+                      );
+                    } else {
+                      return SizedBox.shrink();
+                    }
+                  },
                 ),
                 TextButton(
                     onPressed: () async {
@@ -127,26 +158,8 @@ class _MyAppState extends State<MyApp> {
     // final endTime = DateTime.now().millisecondsSinceEpoch;
     // print('infer cost time=${endTime - startTime}ms');
     //_clipTextEncoder?.infer();
-    const imgPath = "assets/images/cycle.jpg";
     final path = await getAccessiblePathForAsset(imgPath, "test.jpg");
     _clipImageEncoder?.inferByImage(path);
-    const windowByteCount = frameSize * 2 * RecordManager.sampleRate ~/ 1000;
-    final bytes = await File(_pcmPath!).readAsBytes();
-    var start = 0;
-    var end = start + windowByteCount;
-    List<int> frameBuffer;
-    final startTime = DateTime.now().millisecondsSinceEpoch;
-    while (end <= bytes.length) {
-      frameBuffer = bytes.sublist(start, end).toList();
-      final floatBuffer =
-          _transformBuffer(frameBuffer).map((e) => e / 32768).toList();
-      await _vadIterator?.predict(Float32List.fromList(floatBuffer));
-      start += windowByteCount;
-      end = start + windowByteCount;
-    }
-    _vadIterator?.reset();
-    final endTime = DateTime.now().millisecondsSinceEpoch;
-    print('vad cost time=${endTime - startTime}ms');
   }
 
   Int16List _transformBuffer(List<int> buffer) {
