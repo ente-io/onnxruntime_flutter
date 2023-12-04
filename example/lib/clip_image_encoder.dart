@@ -30,7 +30,7 @@ class ClipImageEncoder {
       ..setInterOpNumThreads(1)
       ..setIntraOpNumThreads(1)
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
-    const assetFileName = 'assets/models/visual.onnx';
+    const assetFileName = 'assets/models/clip-image-vit-32-float32.onnx';
     final rawAssetFile = await rootBundle.load(assetFileName);
     final bytes = rawAssetFile.buffer.asUint8List();
     try {

@@ -158,7 +158,8 @@ class _MyAppState extends State<MyApp> {
     // final endTime = DateTime.now().millisecondsSinceEpoch;
     // print('infer cost time=${endTime - startTime}ms');
     //_clipTextEncoder?.infer();
-    final path = await getAccessiblePathForAsset(imgPath, "test.jpg");
+    const imgPath = "assets/images/cycle.jpg";
+    final path = await getAccessiblePathForAsset(imgPath, "test.png");
     _clipImageEncoder?.inferByImage(path);
   }
 
