@@ -69,8 +69,6 @@ class ClipTextEncoder {
   }
 
   Map<int, String> bytesToUnicode() {
-    //print("ABC".codeUnits);
-    // print(new String.fromCharCodes([65, 66, 67])); // ABC
     List<int> bs = [];
     for (int i = '!'.codeUnitAt(0); i <= '~'.codeUnitAt(0); i++) {
       bs.add(i);
