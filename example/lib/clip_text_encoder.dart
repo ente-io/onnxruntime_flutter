@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:onnxruntime/onnxruntime.dart';
 
 import 'dart:typed_data';
+
+import 'package:tiktoken/tiktoken.dart';
 
 class ClipTextEncoder {
   OrtSessionOptions? _sessionOptions;
@@ -27,7 +31,7 @@ class ClipTextEncoder {
       ..setInterOpNumThreads(1)
       ..setIntraOpNumThreads(1)
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
-    const assetFileName = 'assets/models/clip-text-vit-32-float32.onnx';
+    const assetFileName = 'assets/models/clip-text-vit-32-float32-int32.onnx';
     final rawAssetFile = await rootBundle.load(assetFileName);
     final bytes = rawAssetFile.buffer.asUint8List();
     try {
@@ -39,14 +43,29 @@ class ClipTextEncoder {
   }
 
   infer() async {
-    final runOptions = OrtRunOptions();
-    final data = List.filled(1, Int64List.fromList(List.filled(77, 0)));
-    final inputOrt = OrtValueTensor.createTensorWithDataList(data, [1, 77]);
-    final inputs = {'input': inputOrt};
-    final outputs = _session?.run(runOptions, inputs);
-    print((outputs?[0]?.value as List<List<double>>)[0]);
-    inputOrt.release();
-    runOptions.release();
-    _session?.release();
+    // final runOptions = OrtRunOptions();
+    // final data = List.filled(1, Int64List.fromList(List.filled(77, 0)));
+    // final inputOrt = OrtValueTensor.createTensorWithDataList(data, [1, 77]);
+    // final inputs = {'input': inputOrt};
+    // final outputs = _session?.run(runOptions, inputs);
+    // print((outputs?[0]?.value as List<List<double>>)[0]);
+    // inputOrt.release();
+    // runOptions.release();
+    // _session?.release();
+    final encoding = encodingForModel("gpt2");
+    final tokenIntegers = encoding.encode("tiktoken is great!");
+    print(tokenIntegers);
+    // [ 49406, 24986, 17134, 533, 830, 256, 49407, 0, 0, 0, … ]
+
+    final numTokens = tokenIntegers.length;
+    final tokenBytes = tokenIntegers.map((token) => encoding.decodeSingleTokenBytes(token));
+    print("token integers: $tokenIntegers");
+    print("token bytes: ${tokenBytes.map(utf8.decode).toList()}");
   }
+
+  List<int> pad (List<int> x, int pad_length){
+    return x + List.filled(pad_length - x.length, 0);
+  }
+
+  
 }
