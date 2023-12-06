@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/services.dart';
 import 'package:onnxruntime/onnxruntime.dart';
@@ -67,5 +68,31 @@ class ClipTextEncoder {
     return x + List.filled(pad_length - x.length, 0);
   }
 
-  
+  Map<int, String> bytesToUnicode() {
+    //print("ABC".codeUnits);
+    // print(new String.fromCharCodes([65, 66, 67])); // ABC
+    List<int> bs = [];
+    for (int i = '!'.codeUnitAt(0); i <= '~'.codeUnitAt(0); i++) {
+      bs.add(i);
+    }
+    for (int i = '¡'.codeUnitAt(0); i <= '¬'.codeUnitAt(0); i++) {
+      bs.add(i);
+    }
+    for (int i = '®'.codeUnitAt(0); i <= 'ÿ'.codeUnitAt(0); i++) {
+      bs.add(i);
+    }
+
+    List<int> cs = List.from(bs);
+    int n = 0;
+    for (int b = 0; b < 256; b++) {
+      if (!bs.contains(b)) {
+        bs.add(b);
+        cs.add(256 + n);
+        n += 1;
+      }
+    }
+
+    List<String> ds = cs.map((n) => String.fromCharCode(n)).toList();
+    return Map.fromIterables(bs, ds);
+  }
 }
