@@ -24,7 +24,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final imgPath = "assets/images/input.jpg";
+  final imgPath = "assets/images/cycle.jpg";
   late String _version;
   String? _pcmPath;
   String? _wavPath;
@@ -44,8 +44,8 @@ class _MyAppState extends State<MyApp> {
 
     _clipImageEncoder = ClipImageEncoder();
     _clipImageEncoder?.initModel();
-    // _clipTextEncoder = ClipTextEncoder();
-    // _clipTextEncoder?.initModel();
+    _clipTextEncoder = ClipTextEncoder();
+    _clipTextEncoder?.initModel();
   }
 
   @override
@@ -150,17 +150,20 @@ class _MyAppState extends State<MyApp> {
   }
 
   infer() async {
-    // final startTime = DateTime.now().millisecondsSinceEpoch;
+    final startTime = DateTime.now().millisecondsSinceEpoch;
     // print('out=${(await ModelTypeTest.testBool())[0].value}');
     // print('out=${(await ModelTypeTest.testFloat())[0].value}');
     // print('out=${(await ModelTypeTest.testInt64())[0].value}');
     // print('out=${(await ModelTypeTest.testString())[0].value}');
-    // final endTime = DateTime.now().millisecondsSinceEpoch;
-    // print('infer cost time=${endTime - startTime}ms');
-    //_clipTextEncoder?.infer();
-    const imgPath = "assets/images/cycle.jpg";
-    final path = await getAccessiblePathForAsset(imgPath, "test.png");
-    _clipImageEncoder?.inferByImage(path);
+
+
+    // final path = await getAccessiblePathForAsset(imgPath, "test2.jpg");
+    // _clipImageEncoder?.inferByImage(path);
+
+      
+    final endTime = DateTime.now().millisecondsSinceEpoch;
+    print('infer cost time=${endTime - startTime}ms');
+    _clipTextEncoder?.infer();
   }
 
   Int16List _transformBuffer(List<int> buffer) {

@@ -1,12 +1,10 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/services.dart';
 import 'package:onnxruntime/onnxruntime.dart';
+import 'package:onnxruntime_example/clip_tokenizer.dart';
 
-import 'dart:typed_data';
 
-import 'package:tiktoken/tiktoken.dart';
 
 class ClipTextEncoder {
   OrtSessionOptions? _sessionOptions;
@@ -53,44 +51,13 @@ class ClipTextEncoder {
     // inputOrt.release();
     // runOptions.release();
     // _session?.release();
-    final encoding = encodingForModel("gpt2");
-    final tokenIntegers = encoding.encode("tiktoken is great!");
-    print(tokenIntegers);
+    // final encoding = encodingForModel("gpt2");
+    // final tokenIntegers = encoding.encode("tiktoken is great!");
+    // print(tokenIntegers);
     // [ 49406, 24986, 17134, 533, 830, 256, 49407, 0, 0, 0, … ]
 
-    final numTokens = tokenIntegers.length;
-    final tokenBytes = tokenIntegers.map((token) => encoding.decodeSingleTokenBytes(token));
-    print("token integers: $tokenIntegers");
-    print("token bytes: ${tokenBytes.map(utf8.decode).toList()}");
-  }
-
-  List<int> pad (List<int> x, int pad_length){
-    return x + List.filled(pad_length - x.length, 0);
-  }
-
-  Map<int, String> bytesToUnicode() {
-    List<int> bs = [];
-    for (int i = '!'.codeUnitAt(0); i <= '~'.codeUnitAt(0); i++) {
-      bs.add(i);
-    }
-    for (int i = '¡'.codeUnitAt(0); i <= '¬'.codeUnitAt(0); i++) {
-      bs.add(i);
-    }
-    for (int i = '®'.codeUnitAt(0); i <= 'ÿ'.codeUnitAt(0); i++) {
-      bs.add(i);
-    }
-
-    List<int> cs = List.from(bs);
-    int n = 0;
-    for (int b = 0; b < 256; b++) {
-      if (!bs.contains(b)) {
-        bs.add(b);
-        cs.add(256 + n);
-        n += 1;
-      }
-    }
-
-    List<String> ds = cs.map((n) => String.fromCharCode(n)).toList();
-    return Map.fromIterables(bs, ds);
+    var tokenizer = CLIPTokenizer();
+    await tokenizer.init();
+    print(tokenizer.encode("tiktoken is great!"));
   }
 }
